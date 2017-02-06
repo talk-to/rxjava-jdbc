@@ -72,8 +72,15 @@ final class QuerySelectOnSubscribe<T> implements OnSubscribe<T> {
             query.context().endTransactionObserve();
             query.context().endTransactionSubscribe();
             try {
-                if (state != null)
+                if (state != null) {
                     closeQuietly(state);
+                    try {
+                        if (!state.con.getAutoCommit()) {
+                            Util.closeQuietly(state.con);
+                        }
+                    } catch (Throwable ignored) {
+                    }
+                }
             } finally {
                 handleException(e, subscriber);
             }
@@ -164,5 +171,4 @@ final class QuerySelectOnSubscribe<T> implements OnSubscribe<T> {
             log.debug("closed");
         }
     }
-
 }

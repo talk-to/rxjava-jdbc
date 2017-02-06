@@ -190,7 +190,7 @@ final public class Database {
     /**
      * Constructor. Uses the single connection provided and current thread
      * scheduler (trampoline) to run all queries. The connection will not be
-     * closed in reality though the log may indicate it as having received a
+     * cllosed in reality though the log may indicate it as having received a
      * close call.
      * 
      * @param con

@@ -40,9 +40,8 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
     /**
      * Returns an Observable of the results of pushing one set of parameters
      * through a select query.
-     * 
-     * @param params
-     *            one set of parameters to be run with the query
+     *
+     * @param params one set of parameters to be run with the query
      * @return
      */
     static <T> Observable<T> create(QueryUpdate<T> query, List<Parameter> parameters) {
@@ -63,7 +62,7 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
 
     /**
      * Constructor.
-     * 
+     *
      * @param query
      * @param parameters
      */
@@ -90,6 +89,12 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
                     performUpdate(subscriber, state);
             }
         } catch (Throwable e) {
+            try {
+                if (!state.con.getAutoCommit()) {
+                    performRollbackForcefully(state);
+                }
+            } catch (Throwable ignored) {
+            }
             query.context().endTransactionObserve();
             query.context().endTransactionSubscribe();
             try {
@@ -98,6 +103,20 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
                 handleException(e, subscriber);
             }
         }
+    }
+
+    private void performRollbackForcefully(State state) {
+        debug("rolling back forcefully");
+        query.context().endTransactionObserve();
+        Conditions.checkTrue(!Util.isAutoCommit(state.con));
+        Util.rollback(state.con);
+        // must close before onNext so that connection is released and is
+        // available to a query that might process the onNext
+        if (state.closed.compareAndSet(false, true)) {
+            Util.closeQuietly(state.ps);
+            Util.closeQuietly(state.con);
+        }
+        debug("rolled back");
     }
 
     private Subscription createUnsubscriptionAction(final State state) {
@@ -133,7 +152,7 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
 
     /**
      * Returns true if and only if the sql statement is a commit command.
-     * 
+     *
      * @return if is commit
      */
     private boolean isCommit() {
@@ -142,7 +161,7 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
 
     /**
      * Returns true if and only if the sql statement is a rollback command.
-     * 
+     *
      * @return if is rollback
      */
     private boolean isRollback() {
@@ -152,7 +171,7 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
     /**
      * Commits the current transaction. Throws {@link RuntimeException} if
      * connection is in autoCommit mode.
-     * 
+     *
      * @param subscriber
      * @param state
      */
@@ -181,7 +200,7 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
     /**
      * Rolls back the current transaction. Throws {@link RuntimeException} if
      * connection is in autoCommit mode.
-     * 
+     *
      * @param subscriber
      * @param state
      */
@@ -201,9 +220,8 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
 
     /**
      * Executes the prepared statement.
-     * 
+     *
      * @param subscriber
-     * 
      * @throws SQLException
      */
     @SuppressWarnings("unchecked")
@@ -247,7 +265,7 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
                 Observable<Object> depends = Observable.empty();
                 Observable<T> o = new QuerySelect(QuerySelect.RETURN_GENERATED_KEYS, params,
                         depends, query.context(), query.context().resultSetTransform())
-                                .execute(query.returnGeneratedKeysFunction());
+                        .execute(query.returnGeneratedKeysFunction());
                 Subscriber<T> sub = createSubscriber(subscriber);
                 o.unsafeSubscribe(sub);
             }
@@ -288,7 +306,7 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
 
     /**
      * Notify observer that sequence is complete.
-     * 
+     *
      * @param subscriber
      * @param state
      */
@@ -302,7 +320,7 @@ final class QueryUpdateOnSubscribe<T> implements OnSubscribe<T> {
 
     /**
      * Notify observer of an error.
-     * 
+     *
      * @param e
      * @param subscriber
      */
