@@ -3,25 +3,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.github.davidmoten</groupId>
-        <artifactId>sonatype-parent</artifactId>
-        <version>0.1</version>
-    </parent>
+    <groupId>com.github.davidmoten</groupId>
     <artifactId>rxjava-jdbc-riva</artifactId>
-    <version>0.7.5-custom-SNAPSHOT</version>
+    <version>0.7.5-custom</version>
 
     <name>${project.artifactId}</name>
     <description>rx-java Observables for jdbc</description>
     <packaging>jar</packaging>
 
-    <url>http://github.com/davidmoten/rx-java-jdbc</url>
-
     <properties>
         <maven-repo-base>http://ci.aws.talk.to:8081/nexus/content/repositories</maven-repo-base>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <scm.url>scm:git:https://github.com/davidmoten/rxjava-jdbc.git</scm.url>
         <maven.compiler.target>1.7</maven.compiler.target>
         <cobertura.version>2.7</cobertura.version>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -41,22 +34,6 @@
         <jmh.version>1.15</jmh.version>
     </properties>
 
-    <ciManagement>
-        <system>Travis</system>
-        <url>https://travis-ci.org/davidmoten/rxjava-jdbc</url>
-    </ciManagement>
-
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/davidmoten/rxjava-jdbc/issues</url>
-    </issueManagement>
-
-    <scm>
-        <connection>${scm.url}</connection>
-        <developerConnection>${scm.url}</developerConnection>
-        <url>${scm.url}</url>
-        <tag>0.6.8</tag>
-    </scm>
 
     <dependencies>
 
